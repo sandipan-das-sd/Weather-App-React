@@ -1,16 +1,13 @@
-// Weather.js
 import React, { Component } from "react";
 import Search from "./Search";
 import axios from "axios";
 import Result from "./Result";
 import Recent from "./Recent";
 
-
 class Weather extends Component {
   constructor(props) {
     super(props);
 
-    // Initial state
     this.state = {
       lat: "",
       lon: "",
@@ -21,41 +18,34 @@ class Weather extends Component {
     };
   }
 
-  // Handler for removing a recent search
   removeRecent = (index) => {
     let recent = [...this.state.recent];
     recent.splice(index, 1);
     this.setState({ recent }, () => {
-      window.localStorage.setItem('recent', JSON.stringify(this.state.recent));
+      window.localStorage.setItem("recent", JSON.stringify(this.state.recent));
     });
   };
 
-  // Handler for searching weather data
   searchHandler = async () => {
     try {
       const { lat, lon, city } = this.state;
 
-      // Check if both latitude and longitude are provided
       if (lat !== "" && lon !== "" && isNaN(city)) {
-        // Show alert and prevent further action
         alert("Please clear latitude and longitude fields to search by city.");
         return;
       }
 
-      // Check if city is provided
       if (city) {
         const response = await axios.get(
           `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=bdebad92abb2bdb8dc467b4a6fefa86f`
         );
 
-        // Update the state with the weather data and city name
         this.setState(
           {
             weatherData: response.data,
             isSearched: true,
           },
           () => {
-            // Add the current search to recent searches
             this.addDataToRecent();
           }
         );
@@ -67,17 +57,12 @@ class Weather extends Component {
     }
   };
 
-  // Lifecycle method - runs after the component is mounted
   componentDidMount() {
-    // Retrieve recent searches from local storage
-    const data = window.localStorage.getItem('recent');
+    const data = window.localStorage.getItem("recent");
     let recent = data === null ? [] : JSON.parse(data);
-
-    // Update the state with recent searches
     this.setState({ recent });
   }
 
-  // Add current search data to recent searches
   addDataToRecent = () => {
     let recent = this.state.recent;
     recent.push({
@@ -86,15 +71,19 @@ class Weather extends Component {
       city: this.state.city,
     });
 
-    // Update state and store recent searches in local storage
-    this.setState({
-      recent
-    }, () => {
-      window.localStorage.setItem('recent', JSON.stringify(this.state.recent));
-    });
+    this.setState(
+      {
+        recent,
+      },
+      () => {
+        window.localStorage.setItem(
+          "recent",
+          JSON.stringify(this.state.recent)
+        );
+      }
+    );
   };
 
-  // Handler for input changes
   changeHandler = (event) => {
     const name = event.target.name;
     this.setState({
@@ -102,7 +91,6 @@ class Weather extends Component {
     });
   };
 
-  // Handler for researching with new coordinates
   researchHandler = async (lat, lon) => {
     this.setState({ lat, lon, weatherData: null });
 
@@ -111,7 +99,6 @@ class Weather extends Component {
         `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=bdebad92abb2bdb8dc467b4a6fefa86f`
       );
 
-      // Update the state with the weather data and city name
       this.setState({
         weatherData: response.data,
         city: response.data.name,
@@ -122,7 +109,6 @@ class Weather extends Component {
     }
   };
 
-  // Handler for getting location
   locationHandler = () => {
     this.setState({
       lat: "",
@@ -153,7 +139,6 @@ class Weather extends Component {
               `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=bdebad92abb2bdb8dc467b4a6fefa86f`
             );
 
-            // Update the state with the weather data and city name
             this.setState(
               {
                 weatherData: response.data,
@@ -161,7 +146,6 @@ class Weather extends Component {
                 isSearched: true,
               },
               () => {
-                // Add the current search to recent searches
                 this.addDataToRecent();
               }
             );
@@ -181,9 +165,11 @@ class Weather extends Component {
   render() {
     return (
       <div className="container pt-4" style={{ height: "500px" }}>
-        {/* Recent component to display recent searches */}
-        <Recent recent={this.state.recent} research={this.researchHandler} removeRecent={this.removeRecent} />
-        {/* Search component */}
+        <Recent
+          recent={this.state.recent}
+          research={this.researchHandler}
+          removeRecent={this.removeRecent}
+        />
         <Search
           lat={this.state.lat}
           lon={this.state.lon}
@@ -193,7 +179,6 @@ class Weather extends Component {
           getLocation={this.locationHandler}
           searchHandler={this.searchHandler}
         />
-        {/* Result component to display weather data */}
         <Result
           isSearched={this.state.isSearched}
           weatherData={this.state.weatherData}
